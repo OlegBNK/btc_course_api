@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Constants\DataOutput;
 use App\Entity\BtcCourse;
 use App\Repository\BtcCourseRepository;
 use App\Service\API\Api;
@@ -20,7 +19,8 @@ class DataFetcher
 
     private const CURRENCY_TO = [
         'USD',
-        'EUR'
+        'EUR',
+        'UAH'
     ];
 
     public function __construct(

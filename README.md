@@ -27,3 +27,11 @@ create database
 composer install
 symfony server:start
 ```
+
+чтобы наполнить базу данными, нужно перейти `/fillData`
+
+чтобы использовать API `/{dateFrom}/{dateTo}`
+
+dateFrom и dateTo вводить в формате `2022-06-10 12:00`
+
+/2022-06-10 11:00/2022-06-10 12:00
