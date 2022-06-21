@@ -8,14 +8,11 @@ use App\Service\API\Api;
 
 class DataFetcher
 {
-    /** @var Api */
-    public $api;
+    public Api $api;
 
-    /** @var BtcCourseRepository */
-    public $btcCourseRepository;
+    public BtcCourseRepository $btcCourseRepository;
 
-    /** @var DateConversion */
-    public $dateConversion;
+    public DateConversion $dateConversion;
 
     private const CURRENCY_TO = [
         'USD'
@@ -32,10 +29,6 @@ class DataFetcher
         $this->dateConversion = $dateConversion;
     }
 
-    /**
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
     public function fillingTable(): void
     {
         if ($this->btcCourseRepository->isEmptyTable() === true) {
@@ -51,13 +44,6 @@ class DataFetcher
         }
     }
 
-    /**
-     * @param string $currencyTo
-     * @param \DateTimeImmutable|null $showTo
-     * @param \DateTimeImmutable|null $beginningToday
-     * @param \DateTimeImmutable|null $lastAddedDate
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     private function addingTransactionsToTable(
         string $currencyTo,
         ?\DateTimeImmutable $showTo = null,
@@ -84,10 +70,6 @@ class DataFetcher
         }
     }
 
-    /**
-     * @param string $currencyTo
-     * @param array $transaction
-     */
     private function addingEntityToTable(string $currencyTo, array $transaction): void
     {
         $btc = new BtcCourse(
@@ -101,12 +83,6 @@ class DataFetcher
         $this->btcCourseRepository->add($btc, true);
     }
 
-    /**
-     * @param string $dateFrom
-     * @param string $dateTo
-     * @return array
-     * @throws \Doctrine\DBAL\Exception
-     */
     public function getCurrencyApiByDateRange(string $dateFrom, string $dateTo): array
     {
         $this->dateConversion->validateDate($dateFrom);

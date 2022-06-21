@@ -21,10 +21,6 @@ class BtcCourseRepository extends ServiceEntityRepository
         parent::__construct($registry, BtcCourse::class);
     }
 
-    /**
-     * @param BtcCourse $entity
-     * @param bool $flush
-     */
     public function add(BtcCourse $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -34,10 +30,6 @@ class BtcCourseRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @param BtcCourse $entity
-     * @param bool $flush
-     */
     public function remove(BtcCourse $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
@@ -47,11 +39,6 @@ class BtcCourseRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @return BtcCourse
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
     public function getLastCourse(): BtcCourse
     {
         return $this->getEntityManager()
@@ -64,11 +51,6 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->getSingleResult();
     }
 
-    /**
-     * @return bool
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
     public function isEmptyTable(): bool
     {
         $em = $this->getEntityManager();
@@ -82,12 +64,6 @@ class BtcCourseRepository extends ServiceEntityRepository
         return (int)$result === 0;
     }
 
-    /**
-     * @param string $currencyTo
-     * @return int|mixed|string
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
     public function getDateOldAddedCourse(string $currencyTo): BtcCourse
     {
         return $this->getEntityManager()
@@ -102,12 +78,6 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->getSingleResult();
     }
 
-    /**
-     * @param string $currencyTo
-     * @return int|mixed|string
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
     public function getDateLastAddedCourse(string $currencyTo): BtcCourse
     {
         return $this->getEntityManager()
@@ -122,12 +92,6 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->getSingleResult();
     }
 
-    /**
-     * @param \DateTimeImmutable $dateTimeFrom
-     * @param \DateTimeImmutable $dateTimeTo
-     * @return array
-     * @throws \Doctrine\DBAL\Exception
-     */
     public function getDataByDateRange(\DateTimeImmutable $dateTimeFrom, \DateTimeImmutable $dateTimeTo): array
     {
         return $this->getEntityManager()

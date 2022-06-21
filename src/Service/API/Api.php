@@ -6,10 +6,7 @@ use App\Service\DateConversion;
 
 class Api
 {
-    /**
-     * @var DateConversion
-     */
-    private $dateConversion;
+    private DateConversion $dateConversion;
 
     private const API_KEY = '479cf5de35930b8371a2f6325528417c57d5d264f72b756cc9a5e3bb565d1716';
 
@@ -19,10 +16,7 @@ class Api
 
     private const CURRENCY_FROM = 'BTC';
 
-    /**
-     * @var \GuzzleHttp\Client
-     */
-    private $client;
+    private \GuzzleHttp\Client $client;
 
     public function __construct(DateConversion $dateConversion, \GuzzleHttp\Client $client)
     {
@@ -30,24 +24,12 @@ class Api
         $this->client = $client;
     }
 
-    /**
-     * @param string $currencyTo
-     * @param \DateTimeImmutable|null $showTo
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
     public function get(string $currencyTo, ?\DateTimeImmutable $showTo = null): array
     {
         $response = $this->client->request('GET', $this->buildUrl($currencyTo, $showTo));
         return json_decode((string)$response->getBody(), true)['Data']['Data'];
     }
 
-    /**
-     * @param string $currencyTo
-     * @param \DateTimeImmutable|null $showTo
-     * @return string
-     * @throws \Exception
-     */
     private function buildUrl(string $currencyTo, ?\DateTimeImmutable $showTo = null): string
     {
         $url = sprintf(

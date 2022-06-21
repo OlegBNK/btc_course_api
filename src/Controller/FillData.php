@@ -7,12 +7,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-class FillDataController extends AbstractController
+class FillData extends AbstractController
 {
-    /**
-     * @var DataFetcher
-     */
-    private $dataFetcher;
+    private DataFetcher $dataFetcher;
 
     public function __construct(DataFetcher $dataFetcher)
     {
@@ -20,7 +17,6 @@ class FillDataController extends AbstractController
     }
 
     /**
-     * @return JsonResponse
      * @Route("/fillData")
      */
     public function main(): JsonResponse
