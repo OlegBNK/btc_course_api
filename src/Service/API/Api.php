@@ -13,7 +13,7 @@ class Api
 
     private const API_KEY = '479cf5de35930b8371a2f6325528417c57d5d264f72b756cc9a5e3bb565d1716';
 
-    private const LIMIT = 1000;
+    private const LIMIT = 23;
 
     private const API_LINK_HIST_HOUR = "https://min-api.cryptocompare.com/data/v2/histohour?";
 
@@ -34,7 +34,7 @@ class Api
     public function get(string $currencyTo, ?\DateTimeImmutable $showTo = null): array
     {
         $response = $this->client->request('GET', $this->buildUrl($currencyTo, $showTo));
-
+//dd(12);
         return json_decode((string)$response->getBody(), true)['Data']['Data'];
     }
 

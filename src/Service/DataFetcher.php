@@ -18,9 +18,7 @@ class DataFetcher
     public $dateConversion;
 
     private const CURRENCY_TO = [
-        'USD',
-        'EUR',
-        'UAH'
+        'USD'
     ];
 
     public function __construct(
@@ -37,8 +35,9 @@ class DataFetcher
     public function fillingTable(): void
     {
         if ($this->btcCourseRepository->isEmptyTable() === true) {
+            $beginningToday = \DateTimeImmutable::createFromFormat('H\h i\m s\s', '00h 00m 00s');
             foreach (self::CURRENCY_TO as $currencyTo) {
-                $this->addingTransactionsToTable($currencyTo);
+                $this->addingTransactionsToTable($currencyTo, null, $beginningToday);
             }
         } else {
             foreach (self::CURRENCY_TO as $currencyTo) {
@@ -48,19 +47,41 @@ class DataFetcher
         }
     }
 
-    private function addingTransactionsToTable($currencyTo, $showTo = null): void
+    /**
+     * @param string $currencyTo
+     * @param \DateTimeImmutable|null $showTo
+     * @param \DateTimeImmutable|null $beginningToday
+     */
+    private function addingTransactionsToTable(
+        string $currencyTo,
+        ?\DateTimeImmutable $showTo = null,
+        ?\DateTimeImmutable $beginningToday = null
+    ): void
     {
-        foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
-            $btc = new BtcCourse(
-                $currencyTo,
-                $this->dateConversion->timestampToDateTime($transaction['time']),
-                $transaction['high'],
-                $transaction['low'],
-                $transaction['open'],
-                $transaction['close']
-            );
-            $this->btcCourseRepository->add($btc, true);
+        if ($beginningToday) {
+            foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
+                if ($beginningToday->getTimestamp() <= $transaction['time']) {
+                    $this->addingEntityToTable($currencyTo, $transaction);
+                }
+            }
+        } else {
+            foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
+                $this->addingEntityToTable($currencyTo, $transaction);
+            }
         }
+    }
+
+    private function addingEntityToTable($currencyTo, $transaction): void
+    {
+        $btc = new BtcCourse(
+            $currencyTo,
+            $this->dateConversion->timestampToDateTime($transaction['time']),
+            $transaction['high'],
+            $transaction['low'],
+            $transaction['open'],
+            $transaction['close']
+        );
+        $this->btcCourseRepository->add($btc, true);
     }
 
     public function getCurrencyApiByDateRange(string $dateFrom, string $dateTo)
