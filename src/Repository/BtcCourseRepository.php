@@ -21,10 +21,6 @@ class BtcCourseRepository extends ServiceEntityRepository
         parent::__construct($registry, BtcCourse::class);
     }
 
-    /**
-     * @param BtcCourse $entity
-     * @param bool $flush
-     */
     public function add(BtcCourse $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
