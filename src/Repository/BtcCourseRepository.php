@@ -84,6 +84,26 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->getSingleResult();
     }
 
+    /**
+     * @param string $currencyTo
+     * @return int|mixed|string
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getDateLastAddedCourse(string $currencyTo)
+    {
+        return $this->getEntityManager()
+            ->createQueryBuilder()
+            ->select('b')
+            ->from('\App\Entity\BtcCourse', 'b')
+            ->andWhere('b.currency = :currency')
+            ->setParameter('currency', $currencyTo)
+            ->orderBy('b.time', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
     public function getDataByDateRange($dateTimeFrom, $dateTimeTo)
     {
         return $this->getEntityManager()

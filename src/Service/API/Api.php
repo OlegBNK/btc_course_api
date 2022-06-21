@@ -34,7 +34,6 @@ class Api
     public function get(string $currencyTo, ?\DateTimeImmutable $showTo = null): array
     {
         $response = $this->client->request('GET', $this->buildUrl($currencyTo, $showTo));
-//dd(12);
         return json_decode((string)$response->getBody(), true)['Data']['Data'];
     }
 

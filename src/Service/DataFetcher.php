@@ -41,8 +41,8 @@ class DataFetcher
             }
         } else {
             foreach (self::CURRENCY_TO as $currencyTo) {
-                $oldAddedDate = $this->btcCourseRepository->getDateOldAddedCourse($currencyTo)->getTime();
-                $this->addingTransactionsToTable($currencyTo, $oldAddedDate);
+                $lastAddedDate = $this->btcCourseRepository->getDateLastAddedCourse($currencyTo)->getTime();
+                $this->addingTransactionsToTable($currencyTo, null, null, $lastAddedDate);
             }
         }
     }
@@ -51,16 +51,24 @@ class DataFetcher
      * @param string $currencyTo
      * @param \DateTimeImmutable|null $showTo
      * @param \DateTimeImmutable|null $beginningToday
+     * @param \DateTimeImmutable|null $lastAddedDate
      */
     private function addingTransactionsToTable(
         string $currencyTo,
         ?\DateTimeImmutable $showTo = null,
-        ?\DateTimeImmutable $beginningToday = null
+        ?\DateTimeImmutable $beginningToday = null,
+        ?\DateTimeImmutable $lastAddedDate = null
     ): void
     {
         if ($beginningToday) {
             foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
                 if ($beginningToday->getTimestamp() <= $transaction['time']) {
+                    $this->addingEntityToTable($currencyTo, $transaction);
+                }
+            }
+        } elseif ($lastAddedDate) {
+            foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
+                if ($lastAddedDate->getTimestamp() < $transaction['time']) {
                     $this->addingEntityToTable($currencyTo, $transaction);
                 }
             }
