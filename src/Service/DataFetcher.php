@@ -32,6 +32,10 @@ class DataFetcher
         $this->dateConversion = $dateConversion;
     }
 
+    /**
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function fillingTable(): void
     {
         if ($this->btcCourseRepository->isEmptyTable() === true) {
@@ -52,6 +56,7 @@ class DataFetcher
      * @param \DateTimeImmutable|null $showTo
      * @param \DateTimeImmutable|null $beginningToday
      * @param \DateTimeImmutable|null $lastAddedDate
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function addingTransactionsToTable(
         string $currencyTo,
@@ -79,7 +84,11 @@ class DataFetcher
         }
     }
 
-    private function addingEntityToTable($currencyTo, $transaction): void
+    /**
+     * @param string $currencyTo
+     * @param array $transaction
+     */
+    private function addingEntityToTable(string $currencyTo, array $transaction): void
     {
         $btc = new BtcCourse(
             $currencyTo,
@@ -92,7 +101,13 @@ class DataFetcher
         $this->btcCourseRepository->add($btc, true);
     }
 
-    public function getCurrencyApiByDateRange(string $dateFrom, string $dateTo)
+    /**
+     * @param string $dateFrom
+     * @param string $dateTo
+     * @return array
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getCurrencyApiByDateRange(string $dateFrom, string $dateTo): array
     {
         $this->dateConversion->validateDate($dateFrom);
         $this->dateConversion->validateDate($dateTo);
