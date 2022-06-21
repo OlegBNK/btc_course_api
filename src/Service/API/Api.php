@@ -19,7 +19,6 @@ class Api
 
     private const CURRENCY_FROM = 'BTC';
 
-
     /**
      * @var \GuzzleHttp\Client
      */
@@ -31,12 +30,24 @@ class Api
         $this->client = $client;
     }
 
+    /**
+     * @param string $currencyTo
+     * @param \DateTimeImmutable|null $showTo
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function get(string $currencyTo, ?\DateTimeImmutable $showTo = null): array
     {
         $response = $this->client->request('GET', $this->buildUrl($currencyTo, $showTo));
         return json_decode((string)$response->getBody(), true)['Data']['Data'];
     }
 
+    /**
+     * @param string $currencyTo
+     * @param \DateTimeImmutable|null $showTo
+     * @return string
+     * @throws \Exception
+     */
     private function buildUrl(string $currencyTo, ?\DateTimeImmutable $showTo = null): string
     {
         $url = sprintf(
@@ -50,11 +61,9 @@ class Api
 
         if ($showTo) {
             $timestamp = $this->dateConversion->dateTimeToTimestamp($showTo->sub(new \DateInterval('P0Y0M0DT1H0M0S')));
-
             $url = sprintf("%s&toTs=%s", $url, $timestamp);
         }
 
         return $url;
     }
-
 }
