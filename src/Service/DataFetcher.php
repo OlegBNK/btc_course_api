@@ -46,7 +46,7 @@ class DataFetcher
         }
     }
 
-    private function addTransactions(string $currencyTo, \DateTimeImmutable $date)
+    private function addTransactions(string $currencyTo, \DateTimeImmutable $date): void
     {
         foreach ($this->api->get($currencyTo) as $transaction) {
             if ($date->getTimestamp() < $transaction['time']) {
