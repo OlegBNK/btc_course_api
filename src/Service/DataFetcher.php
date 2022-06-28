@@ -32,39 +32,24 @@ class DataFetcher
     public function fillingTable(): void
     {
         if ($this->btcCourseRepository->isEmptyTable() === true) {
-            $beginningToday = \DateTimeImmutable::createFromFormat('H\h i\m s\s', '00h 00m 00s');
+            $beginningToday = (new \DateTimeImmutable())
+                ->setTime(0, 0, 0)
+                ->sub(new \DateInterval('P0Y0M0DT1H0M0S'));
             foreach (self::CURRENCY_TO as $currencyTo) {
-                $this->addingTransactionsToTable($currencyTo, null, $beginningToday);
+                $this->addTransactions($currencyTo, $beginningToday);
             }
         } else {
             foreach (self::CURRENCY_TO as $currencyTo) {
                 $lastAddedDate = $this->btcCourseRepository->getDateLastAddedCourse($currencyTo)->getTime();
-                $this->addingTransactionsToTable($currencyTo, null, null, $lastAddedDate);
+                $this->addTransactions($currencyTo, $lastAddedDate);
             }
         }
     }
 
-    private function addingTransactionsToTable(
-        string $currencyTo,
-        ?\DateTimeImmutable $showTo = null,
-        ?\DateTimeImmutable $beginningToday = null,
-        ?\DateTimeImmutable $lastAddedDate = null
-    ): void
+    private function addTransactions(string $currencyTo, \DateTimeImmutable $date)
     {
-        if ($beginningToday) {
-            foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
-                if ($beginningToday->getTimestamp() <= $transaction['time']) {
-                    $this->addingEntityToTable($currencyTo, $transaction);
-                }
-            }
-        } elseif ($lastAddedDate) {
-            foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
-                if ($lastAddedDate->getTimestamp() < $transaction['time']) {
-                    $this->addingEntityToTable($currencyTo, $transaction);
-                }
-            }
-        } else {
-            foreach ($this->api->get($currencyTo, $showTo) as $transaction) {
+        foreach ($this->api->get($currencyTo) as $transaction) {
+            if ($date->getTimestamp() < $transaction['time']) {
                 $this->addingEntityToTable($currencyTo, $transaction);
             }
         }
