@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\BtcCourse;
 use App\Repository\BtcCourseRepository;
 use App\Service\API\Api;
+use Symfony\Component\Console\Input\InputInterface;
 
 class DataFetcher
 {
@@ -13,10 +14,6 @@ class DataFetcher
     public BtcCourseRepository $btcCourseRepository;
 
     public DateConversion $dateConversion;
-
-    private const CURRENCY_TO = [
-        'USD'
-    ];
 
     public function __construct(
         Api $api,
@@ -29,21 +26,44 @@ class DataFetcher
         $this->dateConversion = $dateConversion;
     }
 
-    public function fillingTable(): void
+    public function fillingTable(array $currencies): void
     {
         if ($this->btcCourseRepository->isEmptyTable() === true) {
-            $beginningToday = (new \DateTimeImmutable())
-                ->setTime(0, 0, 0)
-                ->sub(new \DateInterval('P0Y0M0DT1H0M0S'));
-            foreach (self::CURRENCY_TO as $currencyTo) {
-                $this->addTransactions($currencyTo, $beginningToday);
+            foreach ($currencies as $currency) {
+                $this->addTodayTransaction($currency);
             }
         } else {
-            foreach (self::CURRENCY_TO as $currencyTo) {
-                $lastAddedDate = $this->btcCourseRepository->getDateLastAddedCourse($currencyTo)->getTime();
-                $this->addTransactions($currencyTo, $lastAddedDate);
+            $diffCurrencies = array_diff($currencies, $this->btcCourseRepository->getCurrencies());
+            if ($diffCurrencies) {
+                foreach ($diffCurrencies as $diffCurrency) {
+                    $this->addTodayTransaction($diffCurrency);
+                }
+            } else {
+                foreach ($currencies as $currency) {
+                    $this->addMissingTransaction($currency);
+                }
             }
         }
+    }
+
+    public function getCurrencyApiByDateRange(string $dateFrom, string $dateTo): array
+    {
+        $this->dateConversion->validateDate($dateFrom);
+        $this->dateConversion->validateDate($dateTo);
+
+        return $this->btcCourseRepository->getDataByDateRange(
+            new \DateTimeImmutable($dateFrom),
+            new \DateTimeImmutable($dateTo)
+        );
+    }
+
+    private function addTodayTransaction(string $currency): void
+    {
+        $beginningToday = (new \DateTimeImmutable())
+            ->setTime(0, 0, 0)
+            ->sub(new \DateInterval('P0Y0M0DT1H0M0S'));
+
+        $this->addTransactions($currency, $beginningToday);
     }
 
     private function addTransactions(string $currencyTo, \DateTimeImmutable $date): void
@@ -68,14 +88,9 @@ class DataFetcher
         $this->btcCourseRepository->add($btc, true);
     }
 
-    public function getCurrencyApiByDateRange(string $dateFrom, string $dateTo): array
+    private function addMissingTransaction(string $currency): void
     {
-        $this->dateConversion->validateDate($dateFrom);
-        $this->dateConversion->validateDate($dateTo);
-
-        return $this->btcCourseRepository->getDataByDateRange(
-            new \DateTimeImmutable($dateFrom),
-            new \DateTimeImmutable($dateTo)
-        );
+        $lastAddedDate = $this->btcCourseRepository->getDateLastAddedCourse($currency)->getTime();
+        $this->addTransactions($currency, $lastAddedDate);
     }
 }

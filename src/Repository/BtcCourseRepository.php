@@ -107,4 +107,16 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->executeQuery()
             ->fetchAllAssociative();
     }
+
+    public function getCurrencies()
+    {
+        return $this->getEntityManager()
+            ->getConnection()
+            ->createQueryBuilder()
+            ->select('b.currency')
+            ->from('btc_course', 'b')
+            ->distinct()
+            ->executeQuery()
+            ->fetchFirstColumn();
+    }
 }
