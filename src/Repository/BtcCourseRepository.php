@@ -64,20 +64,6 @@ class BtcCourseRepository extends ServiceEntityRepository
         return (int)$result === 0;
     }
 
-//    public function getDateOldAddedCourse(string $currency): BtcCourse
-//    {
-//        return $this->getEntityManager()
-//            ->createQueryBuilder()
-//            ->select('b')
-//            ->from('\App\Entity\BtcCourse', 'b')
-//            ->andWhere('b.currency = :currency')
-//            ->setParameter('currency', $currency)
-//            ->orderBy('b.time', 'ASC')
-//            ->setMaxResults(1)
-//            ->getQuery()
-//            ->getSingleResult();
-//    }
-
     public function getLastAddedCourse(string $currency): BtcCourse
     {
         return $this->getEntityManager()
