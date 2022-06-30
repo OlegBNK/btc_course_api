@@ -10,7 +10,9 @@ class Api
 
     private const API_KEY = '479cf5de35930b8371a2f6325528417c57d5d264f72b756cc9a5e3bb565d1716';
 
-    private const LIMIT = 23;
+    private const LIMIT = 2000;
+
+    public const ONE_DAY_LIMIT = 23;
 
     private const API_LINK_HIST_HOUR = "https://min-api.cryptocompare.com/data/v2/histohour?";
 
@@ -24,20 +26,20 @@ class Api
         $this->client = $client;
     }
 
-    public function get(string $currency, ?\DateTimeImmutable $showTo = null): array
+    public function get(string $currency, ?\DateTimeImmutable $showTo = null, ?int $limit = null): array
     {
-        $response = $this->client->request('GET', $this->buildUrl($currency, $showTo));
+        $response = $this->client->request('GET', $this->buildUrl($currency, $showTo, $limit));
         return json_decode((string)$response->getBody(), true)['Data']['Data'];
     }
 
-    private function buildUrl(string $currency, ?\DateTimeImmutable $showTo = null): string
+    private function buildUrl(string $currency, ?\DateTimeImmutable $showTo = null, ?int $limit = null): string
     {
         $url = sprintf(
             "%sfsym=%s&tsym=%s&limit=%s&api_key=%s",
             self::API_LINK_HIST_HOUR,
             self::CURRENCY_FROM,
             $currency,
-            self::LIMIT,
+            $limit ?: self::LIMIT,
             self::API_KEY
         );
 

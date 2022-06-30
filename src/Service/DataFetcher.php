@@ -26,22 +26,14 @@ class DataFetcher
         $this->dateConversion = $dateConversion;
     }
 
-    public function fillingTable(array $currencies): void
+    public function updateCoursesFor(array $currencies): void
     {
-        if ($this->btcCourseRepository->isEmptyTable() === true) {
-            foreach ($currencies as $currency) {
-                $this->addTodayTransaction($currency);
-            }
-        } else {
-            $diffCurrencies = array_diff($currencies, $this->btcCourseRepository->getCurrencies());
-            if ($diffCurrencies) {
-                foreach ($diffCurrencies as $diffCurrency) {
-                    $this->addTodayTransaction($diffCurrency);
-                }
+        foreach ($currencies as $currency) {
+            $currencyLastDate = $this->btcCourseRepository->getLastAddedCourseDateFor($currency);
+            if ($currencyLastDate) {
+                $this->addMissingTransactions($currency);
             } else {
-                foreach ($currencies as $currency) {
-                    $this->addMissingTransaction($currency);
-                }
+                $this->addTodayTransactions($currency);
             }
         }
     }
@@ -57,28 +49,28 @@ class DataFetcher
         );
     }
 
-    private function addTodayTransaction(string $currency): void
+    private function addTodayTransactions(string $currency): void
     {
         $beginningToday = (new \DateTimeImmutable())
             ->setTime(0, 0, 0)
-            ->sub(new \DateInterval('P0Y0M0DT1H0M0S'));
+            ->sub(new \DateInterval('PT1H'));
 
-        $this->addTransactions($currency, $beginningToday);
+        $this->addTransactions($currency, $beginningToday, Api::ONE_DAY_LIMIT);
     }
 
-    private function addTransactions(string $currencyTo, \DateTimeImmutable $date): void
+    private function addTransactions(string $currency, \DateTimeImmutable $date, ?int $limit = null): void
     {
-        foreach ($this->api->get($currencyTo) as $transaction) {
+        foreach ($this->api->get($currency, null, $limit) as $transaction) {
             if ($date->getTimestamp() < $transaction['time']) {
-                $this->addingEntityToTable($currencyTo, $transaction);
+                $this->addTransaction($currency, $transaction);
             }
         }
     }
 
-    private function addingEntityToTable(string $currencyTo, array $transaction): void
+    private function addTransaction(string $currency, array $transaction): void
     {
         $btc = new BtcCourse(
-            $currencyTo,
+            $currency,
             $this->dateConversion->timestampToDateTime($transaction['time']),
             $transaction['high'],
             $transaction['low'],
@@ -88,9 +80,9 @@ class DataFetcher
         $this->btcCourseRepository->add($btc, true);
     }
 
-    private function addMissingTransaction(string $currency): void
+    private function addMissingTransactions(string $currency): void
     {
-        $lastAddedDate = $this->btcCourseRepository->getDateLastAddedCourse($currency)->getTime();
+        $lastAddedDate = $this->btcCourseRepository->getLastAddedCourse($currency)->getTime();
         $this->addTransactions($currency, $lastAddedDate);
     }
 }

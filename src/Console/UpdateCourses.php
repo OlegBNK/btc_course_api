@@ -1,5 +1,5 @@
-<?php
-// src/Command/CreateUserCommand.php
+<?php declare(strict_types=1);
+
 namespace App\Console;
 
 use App\Service\DataFetcher;
@@ -15,6 +15,8 @@ class UpdateCourses extends Command
 
     private DataFetcher $dataFetcher;
 
+    private const COURSES = ['USD', 'EUR', 'UAH'];
+
     public function __construct(DataFetcher $dataFetcher)
     {
         parent::__construct();
@@ -24,10 +26,16 @@ class UpdateCourses extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $currencies = $input->getArgument('currencies');
+        $array_diff = array_diff($currencies, self::COURSES);
 
-//        dd($currencies);
+        if ($array_diff){
 
-        $this->dataFetcher->fillingTable($currencies);
+            $output->writeln(sprintf("неправильно введен буквенный код валюты: %s", implode(", ", $array_diff)));
+
+            return Command::INVALID;
+        }
+
+        $this->dataFetcher->updateCoursesFor($currencies);
 
         $output->writeln("data updated");
 
@@ -36,10 +44,10 @@ class UpdateCourses extends Command
 
     protected function configure(): void
     {
-//        $this->addArgument('currency', InputArgument::IS_ARRAY, 'description example');
-
-        $this
-//        ->addArgument('limit', InputArgument::REQUIRED, 'What request limit do you need?')
-        ->addArgument('currencies', InputArgument::IS_ARRAY, 'What currencies do you want to set?');
+        $this->addArgument(
+            'currencies',
+            InputArgument::IS_ARRAY,
+            'What currencies do you want to set?'
+        );
     }
 }
