@@ -51,7 +51,7 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->getSingleResult();
     }
 
-    public function isEmptyTable(): bool
+    public function isEmpty(): bool
     {
         $em = $this->getEntityManager();
         $qb = $em->createQueryBuilder();
@@ -64,27 +64,49 @@ class BtcCourseRepository extends ServiceEntityRepository
         return (int)$result === 0;
     }
 
-    /**
-     * @param string $currencyTo
-     * @return int|mixed|string
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function getDateOldAddedCourse(string $currencyTo)
+//    public function getDateOldAddedCourse(string $currency): BtcCourse
+//    {
+//        return $this->getEntityManager()
+//            ->createQueryBuilder()
+//            ->select('b')
+//            ->from('\App\Entity\BtcCourse', 'b')
+//            ->andWhere('b.currency = :currency')
+//            ->setParameter('currency', $currency)
+//            ->orderBy('b.time', 'ASC')
+//            ->setMaxResults(1)
+//            ->getQuery()
+//            ->getSingleResult();
+//    }
+
+    public function getLastAddedCourse(string $currency): BtcCourse
     {
         return $this->getEntityManager()
             ->createQueryBuilder()
             ->select('b')
             ->from('\App\Entity\BtcCourse', 'b')
             ->andWhere('b.currency = :currency')
-            ->setParameter('currency', $currencyTo)
-            ->orderBy('b.time', 'ASC')
+            ->setParameter('currency', $currency)
+            ->orderBy('b.time', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
             ->getSingleResult();
     }
 
-    public function getDataByDateRange($dateTimeFrom, $dateTimeTo)
+    public function getLastAddedCourseDateFor(string $currency): ?BtcCourse
+    {
+        return $this->getEntityManager()
+            ->createQueryBuilder()
+            ->select('b')
+            ->from('\App\Entity\BtcCourse', 'b')
+            ->andWhere('b.currency = :currency')
+            ->setParameter('currency', $currency)
+            ->orderBy('b.time', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function getDataByDateRange(\DateTimeImmutable $dateTimeFrom, \DateTimeImmutable $dateTimeTo): array
     {
         return $this->getEntityManager()
             ->getConnection()
@@ -98,5 +120,17 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->orderBy('b.time', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();
+    }
+
+    public function getCurrencies()
+    {
+        return $this->getEntityManager()
+            ->getConnection()
+            ->createQueryBuilder()
+            ->select('b.currency')
+            ->from('btc_course', 'b')
+            ->distinct()
+            ->executeQuery()
+            ->fetchFirstColumn();
     }
 }

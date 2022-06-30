@@ -7,15 +7,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-class CryptocurrencyController extends AbstractController
+class Cryptocurrency extends AbstractController
 {
-    /** @var DataFetcher */
-    private $dataFetcher;
+    private DataFetcher $dataFetcher;
 
-    /**
-     * CryptocurrencyController constructor.
-     * @param DataFetcher $dataFetcher
-     */
     public function __construct(
         DataFetcher $dataFetcher
     )
@@ -23,12 +18,8 @@ class CryptocurrencyController extends AbstractController
         $this->dataFetcher = $dataFetcher;
     }
 
-
     /**
-     * @param string $dateFrom
-     * @param string $dateTo
      * @Route("/{dateFrom}/{dateTo}")
-     * @return JsonResponse
      */
     public function getApiByDateRange(string $dateFrom, string $dateTo): JsonResponse
     {
@@ -38,7 +29,6 @@ class CryptocurrencyController extends AbstractController
         } catch (\InvalidArgumentException $exception) {
             return new JsonResponse(['error' => $exception->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
         }
-
     }
 
 }

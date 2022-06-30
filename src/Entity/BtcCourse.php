@@ -63,9 +63,6 @@ class BtcCourse
         $this->close = $close;
     }
 
-    /**
-     * @return \DateTimeImmutable
-     */
     public function getTime(): \DateTimeImmutable
     {
         return $this->time;
