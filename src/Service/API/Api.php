@@ -44,7 +44,7 @@ class Api
         );
 
         if ($showTo) {
-            $timestamp = $this->dateConversion->dateTimeToTimestamp($showTo->sub(new \DateInterval('P0Y0M0DT1H0M0S')));
+            $timestamp = $this->dateConversion->dateTimeToTimestamp($showTo->sub(new \DateInterval('P1D')));
             $url = sprintf("%s&toTs=%s", $url, $timestamp);
         }
 

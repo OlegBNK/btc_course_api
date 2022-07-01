@@ -51,22 +51,9 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->getSingleResult();
     }
 
-    public function isEmpty(): bool
+    public function getLastAddedCourse(string $currency): \DateTimeImmutable
     {
-        $em = $this->getEntityManager();
-        $qb = $em->createQueryBuilder();
-
-        $result = $qb->select('COUNT(b)')
-            ->from('\App\Entity\BtcCourse', 'b')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return (int)$result === 0;
-    }
-
-    public function getLastAddedCourse(string $currency): BtcCourse
-    {
-        return $this->getEntityManager()
+        $btc =  $this->getEntityManager()
             ->createQueryBuilder()
             ->select('b')
             ->from('\App\Entity\BtcCourse', 'b')
@@ -76,11 +63,13 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getSingleResult();
+
+        return $btc->getTime();
     }
 
-    public function getLastAddedCourseDateFor(string $currency): ?BtcCourse
+    public function getLastAddedCourseDateFor(string $currency): ?\DateTimeImmutable
     {
-        return $this->getEntityManager()
+        $btc = $this->getEntityManager()
             ->createQueryBuilder()
             ->select('b')
             ->from('\App\Entity\BtcCourse', 'b')
@@ -90,6 +79,8 @@ class BtcCourseRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return ($btc === null) ? null : $btc->getTime();
     }
 
     public function getDataByDateRange(\DateTimeImmutable $dateTimeFrom, \DateTimeImmutable $dateTimeTo): array
