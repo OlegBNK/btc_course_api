@@ -2,20 +2,20 @@
 
 namespace App\Controller;
 
-use App\Service\DataFetcher;
+use App\Service\CoursesReturner;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class Cryptocurrency extends AbstractController
 {
-    private DataFetcher $dataFetcher;
+    private CoursesReturner $coursesReturner;
 
     public function __construct(
-        DataFetcher $dataFetcher
+        CoursesReturner $coursesReturner
     )
     {
-        $this->dataFetcher = $dataFetcher;
+        $this->coursesReturner = $coursesReturner;
     }
 
     /**
@@ -24,7 +24,7 @@ class Cryptocurrency extends AbstractController
     public function getApiByDateRange(string $dateFrom, string $dateTo): JsonResponse
     {
         try {
-            $currencyApiByDateRange = $this->dataFetcher->getCurrencyApiByDateRange($dateFrom, $dateTo);
+            $currencyApiByDateRange = $this->coursesReturner->getCurrencyApiByDateRange($dateFrom, $dateTo);
             return new JsonResponse($currencyApiByDateRange);
         } catch (\InvalidArgumentException $exception) {
             return new JsonResponse(['error' => $exception->getMessage()], JsonResponse::HTTP_BAD_REQUEST);

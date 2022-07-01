@@ -2,28 +2,33 @@
 
 namespace App\Service;
 
-use App\Entity\BtcCourse;
 use App\Repository\BtcCourseRepository;
 use App\Service\API\Api;
 use Symfony\Component\Console\Input\InputInterface;
 
-class DataFetcher
+class CoursesReceiver
 {
+    public const COURSES = ['USD', 'EUR', 'UAH'];
+
     public Api $api;
 
     public BtcCourseRepository $btcCourseRepository;
 
     public DateConversion $dateConversion;
 
+    private CourseFactory $btc;
+
     public function __construct(
         Api $api,
         BtcCourseRepository $btcCourseRepository,
-        DateConversion $dateConversion
+        DateConversion $dateConversion,
+        CourseFactory $btc
     )
     {
         $this->api = $api;
         $this->btcCourseRepository = $btcCourseRepository;
         $this->dateConversion = $dateConversion;
+        $this->btc = $btc;
     }
 
     public function updateCoursesFor(array $currencies): void
@@ -38,24 +43,13 @@ class DataFetcher
         }
     }
 
-    public function getCurrencyApiByDateRange(string $dateFrom, string $dateTo): array
-    {
-        $this->dateConversion->validateDate($dateFrom);
-        $this->dateConversion->validateDate($dateTo);
-
-        return $this->btcCourseRepository->getDataByDateRange(
-            new \DateTimeImmutable($dateFrom),
-            new \DateTimeImmutable($dateTo)
-        );
-    }
-
     private function addTodayTransactions(string $currency): void
     {
-        $beginningToday = (new \DateTimeImmutable())
-            ->setTime(0, 0, 0)
-            ->sub(new \DateInterval('PT1H'));
-
-        $this->addTransactions($currency, $beginningToday, Api::ONE_DAY_LIMIT);
+        $this->addTransactions(
+            $currency,
+            (new \DateTimeImmutable("00:00:00"))->sub(new \DateInterval('PT1H')),
+            Api::ONE_DAY_LIMIT
+        );
     }
 
     private function addTransactions(string $currency, \DateTimeImmutable $date, ?int $limit = null): void
@@ -69,20 +63,12 @@ class DataFetcher
 
     private function addTransaction(string $currency, array $transaction): void
     {
-        $btc = new BtcCourse(
-            $currency,
-            $this->dateConversion->timestampToDateTime($transaction['time']),
-            $transaction['high'],
-            $transaction['low'],
-            $transaction['open'],
-            $transaction['close']
-        );
-        $this->btcCourseRepository->add($btc, true);
+        $this->btcCourseRepository->add($this->btc->making($currency, $transaction), true);
     }
 
     private function addMissingTransactions(string $currency): void
     {
-        $lastAddedDate = $this->btcCourseRepository->getLastAddedCourse($currency)->getTime();
+        $lastAddedDate = $this->btcCourseRepository->getLastAddedCourse($currency);
         $this->addTransactions($currency, $lastAddedDate);
     }
 }

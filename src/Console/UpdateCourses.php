@@ -2,7 +2,7 @@
 
 namespace App\Console;
 
-use App\Service\DataFetcher;
+use App\Service\CoursesReceiver;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,11 +13,9 @@ class UpdateCourses extends Command
     // the name of the command (the part after "bin/console")
     protected static $defaultName = 'app:courses-update';
 
-    private DataFetcher $dataFetcher;
+    private CoursesReceiver $dataFetcher;
 
-    private const COURSES = ['USD', 'EUR', 'UAH'];
-
-    public function __construct(DataFetcher $dataFetcher)
+    public function __construct(CoursesReceiver $dataFetcher)
     {
         parent::__construct();
         $this->dataFetcher = $dataFetcher;
@@ -26,7 +24,7 @@ class UpdateCourses extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $currencies = $input->getArgument('currencies');
-        $array_diff = array_diff($currencies, self::COURSES);
+        $array_diff = array_diff($currencies, CoursesReceiver::COURSES);
 
         if ($array_diff){
 
@@ -47,7 +45,7 @@ class UpdateCourses extends Command
         $this->addArgument(
             'currencies',
             InputArgument::IS_ARRAY,
-            'What currencies do you want to set?'
+            'доступны данные валюты: USD, EUR, UAH'
         );
     }
 }
